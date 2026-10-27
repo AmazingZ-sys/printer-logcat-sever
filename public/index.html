@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <meta name="theme-color" content="#242925">
+  <title>打印日志控制台</title>
+  <link rel="stylesheet" href="/styles.css">
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <div class="page-shell">
+    <header class="masthead">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span>
+        <div><p class="eyebrow">PRINT / OBSERVABILITY</p><h1>打印日志控制台<span class="title-period">.</span></h1></div>
+      </div>
+      <div class="endpoint"><span class="endpoint-label">当前服务</span><span id="service-origin">—</span></div>
+    </header>
+
+    <section class="connection-panel" aria-labelledby="connection-heading">
+      <div class="section-index" aria-hidden="true">01</div>
+      <div class="connection-copy"><h2 id="connection-heading">建立查看连接</h2><p>使用 VIEW_TOKEN 读取设备日志</p></div>
+      <form id="connection-form" class="connection-form">
+        <div class="token-field"><label for="view-token">查看凭据 <span>仅保存在当前页面内存</span></label><input id="view-token" type="password" name="view-token" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="输入 VIEW_TOKEN" aria-describedby="token-note"><span id="token-note" class="sr-only">凭据不会写入浏览器存储或请求网址。</span></div>
+        <button id="connect-button" class="button button-primary" type="submit">连接服务 <span aria-hidden="true">↗</span></button>
+      </form>
+    </section>
+
+    <section class="filter-panel" aria-labelledby="filters-heading">
+      <div class="filter-heading"><div class="heading-group"><span class="section-index" aria-hidden="true">02</span><h2 id="filters-heading">筛选日志</h2><span class="small-note">时间按服务端接收时间</span></div><button id="reset-filters" type="button" class="text-button">重置筛选</button></div>
+      <form id="filter-form" class="filter-grid">
+        <div class="field"><label for="device-id">设备 ID</label><input id="device-id" name="deviceId" placeholder="全部设备" autocomplete="off"></div>
+        <div class="field"><label for="level">日志级别</label><select id="level" name="level"><option value="">全部级别</option value="debug">DEBUG</option><option value="info">INFO</option><option value="warn">WARN</option><option value="error">ERROR</option></select></div>
+        <div class="field"><label for="tag">标签</label><input id="tag" name="tag" placeholder="全部标签" autocomplete="off"></div>
+        <div class="field"><label for="job-id">任务 ID</label><input id="job-id" name="jobId" placeholder="全部任务" autocomplete="off"></div>
+        <div class="field field-search"><label for="query">关键词</label><input id="query" name="q" type="search" placeholder="搜索消息和上下文" autocomplete="off"></div>
+        <div class="field"><label for="from">接收时间 · 起</label><input id="from" name="from" type="datetime-local"></div>
+        <div class="field"><label for="to">接收时间 · 止</label><input id="to" name="to" type="datetime-local"></div>
+        <button class="button button-dark filter-submit" type="submit">应用筛选 <span aria-hidden="true">↓</span></button>
+      </form>
+      <p id="filter-error" class="form-error" role="alert" hidden></p>
+    </section>
+
+    <main class="console" aria-labelledby="console-heading">
+      <div class="console-toolbar">
+        <div class="console-heading"><span class="console-glyph" aria-hidden="true">⌁</span><div><h2 id="console-heading">日志现场</h2><p>新日志置顶 · 按日志 ID 排序</p></div></div>
+        <div class="console-actions"><button id="pause-button" class="button button-console" type="button" disabled>暂停实时</button><button id="export-button" class="button button-console" type="button" disabled>导出 JSON <span aria-hidden="true">↗</span></button></div>
+      </div>
+      <div class="console-statusbar"><div id="connection-status" class="connection-status" data-state="idle" role="status" aria-live="polite" aria-atomic="true"><span class="status-dot" aria-hidden="true"></span><span id="status-text">尚未连接</span></div><button id="retry-button" class="retry-button" type="button" hidden>立即重试</button><span class="buffer-count"><strong id="loaded-count">0</strong> / 1,000 条</span></div>
+      <div class="log-columns" aria-hidden="true"><span>接收时间 / ID</span><span>级别</span><span>设备</span><span>消息 / 标签</span><span></span></div>
+      <div id="log-list" class="log-list" aria-label="已载入日志"></div>
+      <div id="empty-state" class="empty-state"><div class="empty-symbol" aria-hidden="true"><span></span><span></span><span></span></div><h3 id="empty-title">等待建立连接</h3><p id="empty-description">填入查看凭据，开始查看设备的真实日志。</p></div>
+      <footer class="console-footer"><button id="history-button" class="button button-history" type="button" disabled>加载更早日志 <span aria-hidden="true">↓</span></button><p id="history-note" role="status" aria-live="polite">每次读取 100 条，最多显示 1,000 条</p></footer>
+    </main>
+    <footer class="page-footer"><span><i aria-hidden="true"></i> PRINTER LOG SERVICE</span><span>凭据留在此页 · 日志按需读取</span></footer>
+  </div>
+
+  <dialog id="detail-dialog" class="detail-dialog" aria-labelledby="detail-title">
+    <div class="detail-top"><span class="eyebrow">LOG INSPECTOR</span><button id="close-detail" class="close-button" type="button" aria-label="关闭日志详情">×</button></div>
+    <h2 id="detail-title">日志详情</h2><p id="detail-summary" class="detail-summary"></p>
+    <dl id="detail-metadata" class="detail-metadata"></dl>
+    <h3 class="detail-section-title">消息</h3><pre id="detail-message" class="detail-message"></pre>
+    <h3 class="detail-section-title">上下文数据</h3><pre id="detail-data" class="detail-data"></pre>
+  </dialog>
+</body>
+</html>

@@ -1,0 +1,31 @@
+# Standalone server configuration. Publish the GHCR image before first use.
+# Replace both credentials below with different random values (16+ characters).
+services:
+  printer-logs:
+    image: ghcr.io/amazingz-sys/printer-logcat-sever:latest
+    pull_policy: always
+    init: true
+    restart: unless-stopped
+    stop_grace_period: 15s
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: production
+      HOST: 0.0.0.0
+      PORT: "3000"
+      DB_PATH: /app/data/logs.db
+      INGEST_TOKEN: "replace-with-your-random-ingest-token"
+      VIEW_TOKEN: "replace-with-your-different-random-view-token"
+      RETENTION_DAYS: "7"
+      MAX_LOGS: "100000"
+      CORS_ORIGINS: "*"
+    volumes:
+      - printer-logs-data:/app/data
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+volumes:
+  printer-logs-data:
